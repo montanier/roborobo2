@@ -1,3 +1,4 @@
+MODULES = BasicProject DemoMedea EnergyMedea
 CC           = g++ 
 CCFLAGS      = -Wall -O3 -std=c++0x
 LDFLAGS      = `sdl-config --cflags --libs`
