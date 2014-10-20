@@ -25,7 +25,10 @@ class EnergyMedeaSharedData {
 	static double gDeadTime; //use when synchronization is off. time during which the robot is dead (not listening, not moving, not broadcasting). the time is expressed in ratio of gEvaluationTime (between 0 and 1)
 
     static bool gEnergyRequestOutput; // does the robot can modulate its energy request (when being given some) ?
-    static double gSacrifice; // fix sactifice imposed to the energy taken by the robot. If equal to -1 and energyRequestOutput is true use the output, if -1 and energyRequestOutput is false give max energy
+    static bool gAltruismEvolved; // do we use a gene under evolution to choose if the coop action is done ? or is it fixed at setup
+    static double gSharing; // in case the cooperation is fixed (gAltruismEvolved == false) decides if the agent will cooperate or not: -0.5 no cooperation, 0.5 cooperation
+		static int gSetup; // 1 for choice of coop partners based on kinship, 2 for choice of partner based on distance
+		static int gCoopPartner; // 1 for choosing close coop partners, 2 for choosing far away coop partners
     
   	static double gMonitorPositions; //! used in WorldObserver. Compute and log all necessary information for monitoring position and orientation wrt. center.
     

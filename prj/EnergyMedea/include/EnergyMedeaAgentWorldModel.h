@@ -32,7 +32,7 @@ class EnergyMedeaAgentWorldModel : public RobotWorldModel
 
 
 		double getEnergyHarvested() { return _totalHarvested; }
-		void increaseEnergyHarvested() { _totalHarvested += (( 1 - EnergyMedeaSharedData::gSacrifice) * maxEnergyLevel);  } 
+		void increaseEnergyHarvested() { _totalHarvested += maxEnergyLevel;  } 
 		void resetEnergyHarvested() { _totalHarvested = 0 ; }
 };
 
