@@ -229,7 +229,10 @@ void EnergyMedeaController::stepBehaviour()
 	{
 		if (EnergyMedeaSharedData::gSetup == 1)
 		{
-			sharingActionKinship();
+			if (gWorld->getIterations() > EnergyMedeaSharedData::gEvaluationTime) //wait one generation before starting
+			{
+				sharingActionKinship();
+			}
 		}
 		else if (EnergyMedeaSharedData::gSetup == 2)
 		{
@@ -244,6 +247,22 @@ void EnergyMedeaController::stepBehaviour()
 
 void EnergyMedeaController::sharingActionKinship()
 {
+	unsigned long ownParent = _wm->getParent();
+	for ( int i = 0 ; i != gNumberOfRobots ; i++ )
+	{
+		if ( (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->isAlive() == true )
+		{
+			unsigned long parent = (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->getParent();
+			if (parent == ownParent)
+			{
+				//store in a list
+			}
+			else
+			{
+				//store in another list
+			}
+		}
+	}
 	//look at parameter EnergyMedeaSharedData::gCoopPartner to know if we share with close or far
 }
 
@@ -438,6 +457,9 @@ void EnergyMedeaController::selectRandomGenome()
 		setNewGenomeStatus(true);
 
 		_birthdate = gWorld->getIterations();
+
+		_wm->setParent((unsigned long) (_birthdateList[(*it).first]*(gNumberOfRobots+1))+(*it).first);
+		gLogFile << gWorld->getIterations() <<  " : " << _wm->getParent() << std::endl;
 
 		// descend from
 		gLogFile << gWorld->getIterations() <<  " : " << _wm->getId() << "::" << _birthdate << " df " << (*it).first << "," << _birthdateList[(*it).first] << std::endl;
