@@ -18,7 +18,10 @@ double EnergyMedeaSharedData::gDeadTime = 0.0; // how long a robot will remain d
 bool EnergyMedeaSharedData::gSynchronization = true;
 
 bool EnergyMedeaSharedData::gEnergyRequestOutput = 1;
-double EnergyMedeaSharedData::gSacrifice = -1;
+bool EnergyMedeaSharedData::gAltruismEvolved = true;
+double EnergyMedeaSharedData::gSharing = 0.0;
+int EnergyMedeaSharedData::gSetup = 1;
+int EnergyMedeaSharedData::gCoopPartner = 1;
 
 double EnergyMedeaSharedData::gMonitorPositions;
 

@@ -203,28 +203,53 @@ void EnergyMedeaController::stepBehaviour()
 	nn->step();
 
 	std::vector<double> outputs = nn->readOut();
+	delete (inputs);
 
 	_wm->_desiredTranslationalValue = outputs[0];
 	_wm->_desiredRotationalVelocity = outputs[1];
-
-	if ( EnergyMedeaSharedData::gEnergyRequestOutput)
-	{
-		_wm->setEnergyRequestValue(outputs[2]);
-	}
-	else if (EnergyMedeaSharedData::gSacrifice > 0)
-	{
-		_wm->setEnergyRequestValue(1 - EnergyMedeaSharedData::gSacrifice);
-	}
-	else
-	{
-		_wm->setEnergyRequestValue(1);
-	}
+	_wm->setEnergyRequestValue(1.0);
 
 	// normalize to motor interval values
 	_wm->_desiredTranslationalValue = _wm->_desiredTranslationalValue * gMaxTranslationalSpeed;
 	_wm->_desiredRotationalVelocity = _wm->_desiredRotationalVelocity * gMaxRotationalSpeed;
 
-	delete (inputs);
+
+	//decide to share or not the energy
+	double sharing = 0.0;
+	if (EnergyMedeaSharedData::gAltruismEvolved == true)
+	{
+		sharing =	_currentGenome[_currentGenome.size()-1];
+	}
+	else
+	{
+		sharing = EnergyMedeaSharedData::gSharing;
+	}
+
+	if(sharing >= 0.0)
+	{
+		if (EnergyMedeaSharedData::gSetup == 1)
+		{
+			sharingActionKinship();
+		}
+		else if (EnergyMedeaSharedData::gSetup == 2)
+		{
+			sharingActionNeighbours();
+		}
+	}
+	else
+	{
+		//selfish action, keep all, nothing to do
+	}
+}
+
+void EnergyMedeaController::sharingActionKinship()
+{
+	//look at parameter EnergyMedeaSharedData::gCoopPartner to know if we share with close or far
+}
+
+void EnergyMedeaController::sharingActionNeighbours()
+{
+	//look at parameter EnergyMedeaSharedData::gCoopPartner to know if we share with close or far
 }
 
 
@@ -488,8 +513,6 @@ void EnergyMedeaController::resetRobot()
 		_nbInputs += 2; // incl. landmark (angle,dist)
 
 	_nbOutputs = 2;
-	if ( EnergyMedeaSharedData::gEnergyRequestOutput )
-		_nbOutputs += 1; // incl. energy request
 
 	_nbHiddenLayers = EnergyMedeaSharedData::gNbHiddenLayers;
 
@@ -499,7 +522,7 @@ void EnergyMedeaController::resetRobot()
 
 	createNN();
 
-	unsigned int const nbGene = computeRequiredNumberOfWeights();
+	unsigned int const nbGene = computeRequiredNumberOfWeights() + 1;//add an altruistic gene. If less than 0 the agent is egoistic. If greter than 0 the agent is altruistic
 
 	if ( gVerbose )
 		std::cout << std::flush ;
