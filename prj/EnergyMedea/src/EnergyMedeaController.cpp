@@ -571,7 +571,7 @@ double EnergyMedeaController::computeRelatedness()
 	// compute relatedness
 	// d_local : average of distances between active genome and genome in the list
 	// d_global : average of distances between active genome and all genomes present in the lists (except duplications of active genome)
-	// relatedness = (d_local - d_global) / d_global
+	// relatedness = (d_global - d_local) / d_global
 
 	// record all genomes minus duplications of own genome
 	// compute activeCount in the same time
