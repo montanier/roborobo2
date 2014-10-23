@@ -29,6 +29,7 @@ class EnergyMedeaSharedData {
     static double gSharing; // in case the cooperation is fixed (gAltruismEvolved == false) decides if the agent will cooperate or not: -0.5 no cooperation, 0.5 cooperation
 		static int gSetup; // 1 for choice of coop partners based on kinship, 2 for choice of partner based on distance
 		static int gCoopPartner; // 1 for choosing close coop partners, 2 for choosing far away coop partners
+		static double gSacrifice; // 1 for choosing close coop partners, 2 for choosing far away coop partners
     
   	static double gMonitorPositions; //! used in WorldObserver. Compute and log all necessary information for monitoring position and orientation wrt. center.
     

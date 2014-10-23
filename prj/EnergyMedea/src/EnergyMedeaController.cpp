@@ -214,6 +214,7 @@ void EnergyMedeaController::stepBehaviour()
 	_wm->_desiredRotationalVelocity = _wm->_desiredRotationalVelocity * gMaxRotationalSpeed;
 
 
+	//TODO test si sur point d'energie
 	//decide to share or not the energy
 	double sharing = 0.0;
 	if (EnergyMedeaSharedData::gAltruismEvolved == true)
@@ -248,22 +249,66 @@ void EnergyMedeaController::stepBehaviour()
 void EnergyMedeaController::sharingActionKinship()
 {
 	unsigned long ownParent = _wm->getParent();
+	std::vector<int> listSisters;
+	std::vector<int> listNonSisters;
 	for ( int i = 0 ; i != gNumberOfRobots ; i++ )
 	{
 		if ( (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->isAlive() == true )
 		{
-			unsigned long parent = (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->getParent();
-			if (parent == ownParent)
+			if (i != _wm->getId())
 			{
-				//store in a list
-			}
-			else
-			{
-				//store in another list
+				unsigned long parent = (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->getParent();
+				if (parent == ownParent)
+				{
+					gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " sister " << i << std::endl;
+					listSisters.push_back(i);
+				}
+				else
+				{
+					listNonSisters.push_back(i);
+				}
 			}
 		}
 	}
-	//look at parameter EnergyMedeaSharedData::gCoopPartner to know if we share with close or far
+
+	float energyPerSister = EnergyMedeaSharedData::gSacrifice / listSisters.size();
+	//if EnergyMedeaSharedData::gCoopPartner is equal to 1 give to close
+	//otherwise give to far away
+	if (EnergyMedeaSharedData::gCoopPartner == 1)
+	{
+		for (std::vector<int>::iterator it = listSisters.begin(); it != listSisters.end(); it++)
+		{
+			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerSister);
+			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " de " << energyPerSister << "," << *it << std::endl;
+		}
+	}
+	else
+	{
+		std::vector<int> receivers;
+		while(receivers.size() < listSisters.size())
+		{
+			int candidate = std::rand() % listNonSisters.size();
+			bool valid = true;
+			for (unsigned int j = 0 ; j < receivers.size() ; j++ )
+			{
+				if (candidate == receivers[j])
+				{
+					valid = false;
+				}
+			}
+			
+			if (valid == true)
+			{
+				receivers.push_back(candidate);
+			}
+		}
+
+		for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
+		{
+			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerSister);
+		}
+	}
+
 }
 
 void EnergyMedeaController::sharingActionNeighbours()
@@ -459,7 +504,6 @@ void EnergyMedeaController::selectRandomGenome()
 		_birthdate = gWorld->getIterations();
 
 		_wm->setParent((unsigned long) (_birthdateList[(*it).first]*(gNumberOfRobots+1))+(*it).first);
-		gLogFile << gWorld->getIterations() <<  " : " << _wm->getParent() << std::endl;
 
 		// descend from
 		gLogFile << gWorld->getIterations() <<  " : " << _wm->getId() << "::" << _birthdate << " df " << (*it).first << "," << _birthdateList[(*it).first] << std::endl;

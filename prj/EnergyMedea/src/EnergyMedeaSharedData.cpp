@@ -22,6 +22,7 @@ bool EnergyMedeaSharedData::gAltruismEvolved = true;
 double EnergyMedeaSharedData::gSharing = 0.0;
 int EnergyMedeaSharedData::gSetup = 1;
 int EnergyMedeaSharedData::gCoopPartner = 1;
+double EnergyMedeaSharedData::gSacrifice = 1;
 
 double EnergyMedeaSharedData::gMonitorPositions;
 
