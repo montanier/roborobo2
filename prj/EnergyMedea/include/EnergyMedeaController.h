@@ -86,8 +86,6 @@ class EnergyMedeaController : public Controller
 
 		void storeGenome(std::vector<double> genome, int senderId, int senderBirthdate, float sigma);
 		void resetRobot();
-		void sharingActionKinship();
-		void sharingActionNeighbours();
 
 	public:
 

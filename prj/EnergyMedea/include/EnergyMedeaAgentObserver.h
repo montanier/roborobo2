@@ -21,6 +21,9 @@ class EnergyMedeaAgentObserver : public AgentObserver
 	private:
 		EnergyMedeaAgentWorldModel *_wm;
 		
+		void sharingActionKinship();
+		void sharingActionNeighbours();
+
 	public:
 		EnergyMedeaAgentObserver(RobotWorldModel *wm);
 		~EnergyMedeaAgentObserver();

@@ -27,6 +27,7 @@ EnergyMedeaAgentWorldModel::EnergyMedeaAgentWorldModel()
 	
 	_totalHarvested = 0.0;
 	_parent = 0;
+	_sharing = 0.0;
 }
 
 EnergyMedeaAgentWorldModel::~EnergyMedeaAgentWorldModel()
