@@ -212,110 +212,7 @@ void EnergyMedeaController::stepBehaviour()
 	// normalize to motor interval values
 	_wm->_desiredTranslationalValue = _wm->_desiredTranslationalValue * gMaxTranslationalSpeed;
 	_wm->_desiredRotationalVelocity = _wm->_desiredRotationalVelocity * gMaxRotationalSpeed;
-
-
-	//TODO test si sur point d'energie
-	//decide to share or not the energy
-	double sharing = 0.0;
-	if (EnergyMedeaSharedData::gAltruismEvolved == true)
-	{
-		sharing =	_currentGenome[_currentGenome.size()-1];
-	}
-	else
-	{
-		sharing = EnergyMedeaSharedData::gSharing;
-	}
-
-	if(sharing >= 0.0)
-	{
-		if (EnergyMedeaSharedData::gSetup == 1)
-		{
-			if (gWorld->getIterations() > EnergyMedeaSharedData::gEvaluationTime) //wait one generation before starting
-			{
-				sharingActionKinship();
-			}
-		}
-		else if (EnergyMedeaSharedData::gSetup == 2)
-		{
-			sharingActionNeighbours();
-		}
-	}
-	else
-	{
-		//selfish action, keep all, nothing to do
-	}
 }
-
-void EnergyMedeaController::sharingActionKinship()
-{
-	unsigned long ownParent = _wm->getParent();
-	std::vector<int> listSisters;
-	std::vector<int> listNonSisters;
-	for ( int i = 0 ; i != gNumberOfRobots ; i++ )
-	{
-		if ( (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->isAlive() == true )
-		{
-			if (i != _wm->getId())
-			{
-				unsigned long parent = (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->getParent();
-				if (parent == ownParent)
-				{
-					gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " sister " << i << std::endl;
-					listSisters.push_back(i);
-				}
-				else
-				{
-					listNonSisters.push_back(i);
-				}
-			}
-		}
-	}
-
-	float energyPerSister = EnergyMedeaSharedData::gSacrifice / listSisters.size();
-	//if EnergyMedeaSharedData::gCoopPartner is equal to 1 give to close
-	//otherwise give to far away
-	if (EnergyMedeaSharedData::gCoopPartner == 1)
-	{
-		for (std::vector<int>::iterator it = listSisters.begin(); it != listSisters.end(); it++)
-		{
-			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerSister);
-			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " de " << energyPerSister << "," << *it << std::endl;
-		}
-	}
-	else
-	{
-		std::vector<int> receivers;
-		while(receivers.size() < listSisters.size())
-		{
-			int candidate = std::rand() % listNonSisters.size();
-			bool valid = true;
-			for (unsigned int j = 0 ; j < receivers.size() ; j++ )
-			{
-				if (candidate == receivers[j])
-				{
-					valid = false;
-				}
-			}
-			
-			if (valid == true)
-			{
-				receivers.push_back(candidate);
-			}
-		}
-
-		for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
-		{
-			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerSister);
-		}
-	}
-
-}
-
-void EnergyMedeaController::sharingActionNeighbours()
-{
-	//look at parameter EnergyMedeaSharedData::gCoopPartner to know if we share with close or far
-}
-
 
 void EnergyMedeaController::createNN()
 {
@@ -476,6 +373,14 @@ bool EnergyMedeaController::loadNewGenome()
 	{
 		// case: 1+ genome(s) imported, random pick.
 		selectRandomGenome();
+		if (EnergyMedeaSharedData::gAltruismEvolved == true)
+		{
+			_wm->setSharing(_currentGenome[_currentGenome.size()-1]);
+		}
+		else
+		{
+			_wm->setSharing(EnergyMedeaSharedData::gSharing);
+		}
 		return true;
 	}
 	return false;
@@ -603,6 +508,14 @@ void EnergyMedeaController::resetRobot()
 	setNewGenomeStatus(true);
 	_genomesList.clear();
 
+	if (EnergyMedeaSharedData::gAltruismEvolved == true)
+	{
+		_wm->setSharing(_currentGenome[_currentGenome.size()-1]);
+	}
+	else
+	{
+		_wm->setSharing(EnergyMedeaSharedData::gSharing);
+	}
 }
 
 

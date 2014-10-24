@@ -16,6 +16,7 @@ class EnergyMedeaAgentWorldModel : public RobotWorldModel
 		int _lifeStatus ;
 		double _totalHarvested;
 		unsigned long _parent;
+		double _sharing;
 
 	public:
 		EnergyMedeaAgentWorldModel();
@@ -38,6 +39,9 @@ class EnergyMedeaAgentWorldModel : public RobotWorldModel
 
 		unsigned long getParent() {return _parent;}
 		void setParent(unsigned long parent) {_parent = parent;}
+
+		double getSharing() {return _sharing;}
+		void setSharing(double sharing) {_sharing = sharing;}
 };
 
 #endif
