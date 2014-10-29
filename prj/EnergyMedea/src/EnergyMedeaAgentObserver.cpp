@@ -38,59 +38,60 @@ void EnergyMedeaAgentObserver::reset()
 
 void EnergyMedeaAgentObserver::step()
 {
-
-	// * send callback messages to objects touched or walked upon.
-
-	// through distance sensors
-	for( int i = 0 ; i < _wm->_cameraSensorsNb; i++)
+	if (_wm->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE)
 	{
-		int targetIndex = _wm->getObjectIdFromCameraSensor(i);
+		// * send callback messages to objects touched or walked upon.
+		// through distance sensors
+		for( int i = 0 ; i < _wm->_cameraSensorsNb; i++)
+		{
+			int targetIndex = _wm->getObjectIdFromCameraSensor(i);
 
-		if ( PhysicalObject::isInstanceOf(targetIndex) )   // sensor ray bumped into a physical object
+			if ( PhysicalObject::isInstanceOf(targetIndex) )   // sensor ray bumped into a physical object
+			{
+				targetIndex = targetIndex - gPhysicalObjectIndexStartOffset;
+				//std::cout << "[DEBUG] Robot #" << _wm->getId() << " touched " << targetIndex << "\n";
+				gPhysicalObjects[targetIndex]->isTouched(_wm->getId());
+			}
+		}
+
+		if (EnergyMedeaSharedData::gSetup == 2)
+		{
+			locateNeighbours();
+		}
+
+		// through floor sensor
+		int targetIndex = _wm->getGroundSensorValue();
+		if ( PhysicalObject::isInstanceOf(targetIndex) ) // ground sensor is upon a physical object (OR: on a place marked with this physical object footprint, cf. groundsensorvalues image)
 		{
 			targetIndex = targetIndex - gPhysicalObjectIndexStartOffset;
-			//std::cout << "[DEBUG] Robot #" << _wm->getId() << " touched " << targetIndex << "\n";
-			gPhysicalObjects[targetIndex]->isTouched(_wm->getId());
-		}
-	}
+			//std::cout << "[DEBUG] #" << _wm->getId() << " walked upon " << targetIndex << "\n";
+			gPhysicalObjects[targetIndex]->isWalked(_wm->getId());
+			_wm->increaseEnergyHarvested();
 
-	if (EnergyMedeaSharedData::gSetup == 2)
-	{
-		locateNeighbours();
-	}
-
-	// through floor sensor
-	int targetIndex = _wm->getGroundSensorValue();
-	if ( PhysicalObject::isInstanceOf(targetIndex) ) // ground sensor is upon a physical object (OR: on a place marked with this physical object footprint, cf. groundsensorvalues image)
-	{
-		targetIndex = targetIndex - gPhysicalObjectIndexStartOffset;
-		//std::cout << "[DEBUG] #" << _wm->getId() << " walked upon " << targetIndex << "\n";
-		gPhysicalObjects[targetIndex]->isWalked(_wm->getId());
-		_wm->increaseEnergyHarvested();
-
-		if ( (*gPhysicalObjects[targetIndex]).getType() == 1 ) //type 1 object: energy points
-		{
-			//decide to share or not the energy
-			if(_wm->getSharing() >= 0.0)
+			if ( (*gPhysicalObjects[targetIndex]).getType() == 1 ) //type 1 object: energy points
 			{
-				if (EnergyMedeaSharedData::gSetup == 1)
+				//decide to share or not the energy
+				if(_wm->getSharing() >= 0.0)
 				{
-					if (gWorld->getIterations() > EnergyMedeaSharedData::gEvaluationTime) //wait one generation before starting
+					if (EnergyMedeaSharedData::gSetup == 1)
 					{
-						sharingActionKinship();
+						if (gWorld->getIterations() > EnergyMedeaSharedData::gEvaluationTime) //wait one generation before starting
+						{
+							sharingActionKinship();
+						}
+					}
+					else if (EnergyMedeaSharedData::gSetup == 2)
+					{
+						if (gWorld->getIterations() > 10) //build the neighbour window before starting
+						{
+							sharingActionNeighbours();
+						}
 					}
 				}
-				else if (EnergyMedeaSharedData::gSetup == 2)
+				else
 				{
-					if (gWorld->getIterations() > 10) //build the neighbour window before starting
-					{
-						sharingActionNeighbours();
-					}
+					//selfish action, keep all, nothing to do
 				}
-			}
-			else
-			{
-				//selfish action, keep all, nothing to do
 			}
 		}
 	}
@@ -183,6 +184,9 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 			listNeighbours.push_back(neighboursWindow[iteration][robot]);
 		}
 	}
+	//remove duplicates from vector
+	std::sort( listNeighbours.begin(), listNeighbours.end() );
+	listNeighbours.erase( std::unique( listNeighbours.begin(), listNeighbours.end() ), listNeighbours.end() );
 
 	std::vector<int> listNonNeighbours;
 	for ( int i = 0 ; i != gNumberOfRobots ; i++ )
@@ -205,6 +209,7 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 		}
 	}
 
+	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "size " << listNeighbours.size() << std::endl;
 	float energyPerReceiver = EnergyMedeaSharedData::gSacrifice / listNeighbours.size();
 	//if EnergyMedeaSharedData::gCoopPartner is equal to 1 give to close
 	//otherwise give to far away
@@ -273,9 +278,11 @@ void EnergyMedeaAgentObserver::locateNeighbours()
 			if (currentAgentWM->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE)
 			{
 				tmp.push_back(targetIndex);
+				gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " neighbour " << targetIndex << std::endl;
 			}
 		}
 	}
+	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " indexWindow " <<  indexNeighbours << std::endl;
 	neighboursWindow[indexNeighbours] = tmp;
 	indexNeighbours = (indexNeighbours+1) % 10;
 }
