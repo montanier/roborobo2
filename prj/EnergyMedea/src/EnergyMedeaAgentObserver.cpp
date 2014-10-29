@@ -18,6 +18,12 @@ EnergyMedeaAgentObserver::EnergyMedeaAgentObserver( RobotWorldModel *wm )
 {
 	_wm = (EnergyMedeaAgentWorldModel*)wm;
 
+	indexNeighbours = 0;
+	for (int i = 0 ; i < 10 ; i++)
+	{
+		std::vector<int> tmp;
+		neighboursWindow.push_back(tmp);
+	}
 }
 
 EnergyMedeaAgentObserver::~EnergyMedeaAgentObserver()
@@ -48,6 +54,11 @@ void EnergyMedeaAgentObserver::step()
 		}
 	}
 
+	if (EnergyMedeaSharedData::gSetup == 2)
+	{
+		locateNeighbours();
+	}
+
 	// through floor sensor
 	int targetIndex = _wm->getGroundSensorValue();
 	if ( PhysicalObject::isInstanceOf(targetIndex) ) // ground sensor is upon a physical object (OR: on a place marked with this physical object footprint, cf. groundsensorvalues image)
@@ -71,7 +82,10 @@ void EnergyMedeaAgentObserver::step()
 				}
 				else if (EnergyMedeaSharedData::gSetup == 2)
 				{
-					sharingActionNeighbours();
+					if (gWorld->getIterations() > 10) //build the neighbour window before starting
+					{
+						sharingActionNeighbours();
+					}
 				}
 			}
 			else
@@ -161,5 +175,107 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 
 void EnergyMedeaAgentObserver::sharingActionNeighbours()
 {
-	//look at parameter EnergyMedeaSharedData::gCoopPartner to know if we share with close or far
+	std::vector<int> listNeighbours;
+	for (unsigned int iteration = 0 ; iteration < neighboursWindow.size() ; iteration++ )
+	{
+		for (unsigned int robot = 0 ; robot < neighboursWindow[iteration].size() ; robot++)
+		{
+			listNeighbours.push_back(neighboursWindow[iteration][robot]);
+		}
+	}
+
+	std::vector<int> listNonNeighbours;
+	for ( int i = 0 ; i != gNumberOfRobots ; i++ )
+	{
+		if ( (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->isAlive() == true )
+		{
+			bool aNeighbour = false;
+			for (unsigned int robot = 0 ; robot < listNeighbours.size() ; robot++)
+			{
+				if (i == listNeighbours[robot])
+				{
+					aNeighbour = true;
+					break;
+				}
+			}
+			if (aNeighbour == false)
+			{
+				listNonNeighbours.push_back(i);
+			}
+		}
+	}
+
+	float energyPerReceiver = EnergyMedeaSharedData::gSacrifice / listNeighbours.size();
+	//if EnergyMedeaSharedData::gCoopPartner is equal to 1 give to close
+	//otherwise give to far away
+	if (EnergyMedeaSharedData::gCoopPartner == 1)
+	{
+		for (std::vector<int>::iterator it = listNeighbours.begin(); it != listNeighbours.end(); it++)
+		{
+			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
+			_wm->substractEnergy(energyPerReceiver);
+			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
+			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " ge " << energyPerReceiver << "," << *it << std::endl;
+		}
+	}
+	else
+	{
+		std::vector<int> receivers;
+		if ( listNonNeighbours.size() > listNeighbours.size() ) //if there is enough non-neighbours pick them randomly
+		{
+			while(receivers.size() < listNeighbours.size())
+			{
+				int candidate = std::rand() % listNonNeighbours.size();
+				bool valid = true;
+				for (unsigned int j = 0 ; j < receivers.size() ; j++ )
+				{
+					if (candidate == receivers[j])
+					{
+						valid = false;
+					}
+				}
+
+				if (valid == true)
+				{
+					receivers.push_back(candidate);
+				}
+			}
+		}
+		else //otherwise take all the non-neighbours, and change the energy to give
+		{
+			receivers.swap(listNonNeighbours);
+			energyPerReceiver = EnergyMedeaSharedData::gSacrifice / listNonNeighbours.size();
+		}
+
+		for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
+		{
+			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
+			_wm->substractEnergy(energyPerReceiver);
+			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
+			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " ge " << energyPerReceiver << "," << *it << std::endl;
+		}
+	}
+
+}
+
+void EnergyMedeaAgentObserver::locateNeighbours()
+{
+	std::vector<int> tmp;
+	for( int i = 0 ; i < _wm->_cameraSensorsNb; i++)
+	{
+		int targetIndex = _wm->getObjectIdFromCameraSensor(i);
+
+		if ( targetIndex >= gRobotIndexStartOffset )   // sensor ray bumped into a robot : communication is possible
+		{
+			targetIndex = targetIndex - gRobotIndexStartOffset; // convert image registering index into robot id.
+
+			EnergyMedeaAgentWorldModel* currentAgentWM = dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(targetIndex)->getWorldModel());
+			if (currentAgentWM->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE)
+			{
+				tmp.push_back(targetIndex);
+			}
+		}
+	}
+	neighboursWindow[indexNeighbours] = tmp;
+	indexNeighbours = (indexNeighbours+1) % 10;
 }

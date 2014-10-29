@@ -23,6 +23,10 @@ class EnergyMedeaAgentObserver : public AgentObserver
 		
 		void sharingActionKinship();
 		void sharingActionNeighbours();
+		void locateNeighbours();
+
+		int indexNeighbours;
+		std::vector<std::vector<int> > neighboursWindow;
 
 	public:
 		EnergyMedeaAgentObserver(RobotWorldModel *wm);
