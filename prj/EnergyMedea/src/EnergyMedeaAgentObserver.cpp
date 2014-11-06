@@ -65,11 +65,12 @@ void EnergyMedeaAgentObserver::step()
 		{
 			targetIndex = targetIndex - gPhysicalObjectIndexStartOffset;
 			//std::cout << "[DEBUG] #" << _wm->getId() << " walked upon " << targetIndex << "\n";
-			gPhysicalObjects[targetIndex]->isWalked(_wm->getId());
-			_wm->increaseEnergyHarvested();
-
 			if ( (*gPhysicalObjects[targetIndex]).getType() == 1 ) //type 1 object: energy points
 			{
+				gPhysicalObjects[targetIndex]->isWalked(_wm->getId());
+				_wm->increaseEnergyHarvested();
+				gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " te " << std::endl;
+
 				//decide to share or not the energy
 				if(_wm->getSharing() >= 0.0)
 				{
@@ -209,7 +210,6 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 		}
 	}
 
-	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "size " << listNeighbours.size() << std::endl;
 	float energyPerReceiver = EnergyMedeaSharedData::gSacrifice / listNeighbours.size();
 	//if EnergyMedeaSharedData::gCoopPartner is equal to 1 give to close
 	//otherwise give to far away
@@ -278,11 +278,9 @@ void EnergyMedeaAgentObserver::locateNeighbours()
 			if (currentAgentWM->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE)
 			{
 				tmp.push_back(targetIndex);
-				gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " neighbour " << targetIndex << std::endl;
 			}
 		}
 	}
-	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " indexWindow " <<  indexNeighbours << std::endl;
 	neighboursWindow[indexNeighbours] = tmp;
 	indexNeighbours = (indexNeighbours+1) % 10;
 }

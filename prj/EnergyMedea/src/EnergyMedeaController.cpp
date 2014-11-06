@@ -103,6 +103,7 @@ void EnergyMedeaController::stepBehaviour()
 			_endPos = Point2d (_wm->_xReal , _wm->_yReal);
 			double distance = getEuclidianDistance(_startPos, _endPos);
 			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " dd " << distance << std::endl ;
+			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " pe " << _endPos.x << "," << _endPos.y << std::endl ;
 
 			_wm->setLifeStatus(EnergyMedeaAgentWorldModel::DEAD);
 			_iteration = 0;
