@@ -1,8 +1,14 @@
 #!/bin/bash
 
-dir="/home/jm/results/dispersion/setup-v2/evoFalse_gShare0.5_setup1_coop1_regrow400"
-nbExp=46
-nbInst=4
+dir="/home/jm/results/dispersion/setup-v2/evoFalse_gShare0.5_setup1_coop2_regrow400"
+nbExp=50
+nbInst=5
+
+perl -pi -e 's/gPhysicalObjectDefaultRegrowTimeMax.*/gPhysicalObjectDefaultRegrowTimeMax = 400/' config/energy-medea.properties
+perl -pi -e 's/gAltruismEvolved.*/gAltruismEvolved = false/' config/energy-medea.properties
+perl -pi -e 's/gSharing.*/gSharing = 0.5/' config/energy-medea.properties
+perl -pi -e 's/gSetup.*/gSetup = 1/' config/energy-medea.properties
+perl -pi -e 's/gCoopPartner.*/gCoopPartner = 2/' config/energy-medea.properties
 
 oneRun()
 {
@@ -49,11 +55,6 @@ oneRun()
 }
 
 
-perl -pi -e 's/gPhysicalObjectDefaultRegrowTimeMax.*/gPhysicalObjectDefaultRegrowTimeMax = 400/' config/energy-medea.properties
-perl -pi -e 's/gAltruismEvolved.*/gAltruismEvolved = false/' config/energy-medea.properties
-perl -pi -e 's/gSharing.*/gSharing = 0.5/' config/energy-medea.properties
-perl -pi -e 's/gSetup.*/gSetup = 1/' config/energy-medea.properties
-perl -pi -e 's/gCoopPartner.*/gCoopPartner = 1/' config/energy-medea.properties
 
 
 mainTimeStamp=`date +%H%M%S%N`	
