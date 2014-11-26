@@ -50,6 +50,7 @@ class EnergyMedeaController : public Controller
 
 		void stepBehaviour();
 		void stepEvolution();
+		void logEndGeneration();
 
 		void broadcastGenome();
 		bool loadNewGenome();
@@ -83,6 +84,7 @@ class EnergyMedeaController : public Controller
 
 		Point2d _startPos;
 		Point2d _endPos;
+		double _cumulatedDistance;
 
 		void storeGenome(std::vector<double> genome, int senderId, int senderBirthdate, float sigma);
 		void resetRobot();

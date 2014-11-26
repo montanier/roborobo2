@@ -92,6 +92,17 @@ void EnergyMedeaController::step()
 
 void EnergyMedeaController::stepBehaviour()
 {
+	if (_wm->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE) 
+	{
+		if( _iteration == 1)
+		{
+			_startPos = Point2d(_wm->_xReal,_wm->_yReal);
+			_cumulatedDistance = 0;
+		}
+
+		Point2d currentPos = Point2d (_wm->_xReal , _wm->_yReal);
+		_cumulatedDistance += getEuclidianDistance(_startPos, currentPos);
+	}
 
 	// ---- update energy if needed
 	if ( gEnergyLevel && _wm->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE )
@@ -100,11 +111,7 @@ void EnergyMedeaController::stepBehaviour()
 		assert( _wm->getEnergyLevel() >= 0 );
 		if ( _wm->getEnergyLevel() == 0 )
 		{
-			_endPos = Point2d (_wm->_xReal , _wm->_yReal);
-			double distance = getEuclidianDistance(_startPos, _endPos);
-			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " dd " << distance << std::endl ;
-			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " pe " << _endPos.x << "," << _endPos.y << std::endl ;
-
+			logEndGeneration();
 			_wm->setLifeStatus(EnergyMedeaAgentWorldModel::DEAD);
 			_iteration = 0;
 			_genomesList.clear();
@@ -215,6 +222,15 @@ void EnergyMedeaController::stepBehaviour()
 	_wm->_desiredRotationalVelocity = _wm->_desiredRotationalVelocity * gMaxRotationalSpeed;
 }
 
+void EnergyMedeaController::logEndGeneration()
+{
+	_endPos = Point2d (_wm->_xReal , _wm->_yReal);
+	double distance = getEuclidianDistance(_startPos, _endPos);
+	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " dd " << distance << std::endl ;
+	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " pe " << _endPos.x << "," << _endPos.y << std::endl ;
+	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " dacc " << _cumulatedDistance << std::endl ;
+}
+
 void EnergyMedeaController::createNN()
 {
 	if ( nn != NULL ) // useless: delete will anyway check if nn is NULL or not.
@@ -308,16 +324,11 @@ void EnergyMedeaController::stepEvolution()
 	}
 	else // synchronization is false
 	{
-		if( _iteration == 1)
-			_startPos = Point2d(_wm->_xReal,_wm->_yReal);
-
 		if( _iteration >= EnergyMedeaSharedData::gEvaluationTime )
 		{
 			if (_wm->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE) 
 			{
-				_endPos = Point2d (_wm->_xReal , _wm->_yReal);
-				double distance = getEuclidianDistance(_startPos, _endPos);
-				gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " d " << distance << std::endl ;
+				logEndGeneration();
 			}
 
 			if ( (_wm->getLifeStatus() == EnergyMedeaAgentWorldModel::ACTIVE) || (_wm->getLifeStatus() == EnergyMedeaAgentWorldModel::LISTEN))
