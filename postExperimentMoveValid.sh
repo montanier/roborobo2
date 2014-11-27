@@ -38,6 +38,8 @@ else
 		../Scripts/extract/extractNbContact.py -F $logFileName
 		../Scripts/extract/extractRelatedness.py -F $logFileName
 		../Scripts/extract/extractDistance.py -F $logFileName
+		../Scripts/extract/extractDistanceAccumulated.py -F $logFileName
+		../Scripts/extract/extractCooperationGene.py -F $logFileName
 
 		rm "take$mainTimeStamp" 
 		rm $logFileName 

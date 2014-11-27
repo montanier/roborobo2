@@ -103,6 +103,7 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 	unsigned long ownParent = _wm->getParent();
 	std::vector<int> listSisters;
 	std::vector<int> listNonSisters;
+	std::vector<int> listAll;
 	for ( int i = 0 ; i != gNumberOfRobots ; i++ )
 	{
 		if ( (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->isAlive() == true )
@@ -118,6 +119,7 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 				{
 					listNonSisters.push_back(i);
 				}
+				listAll.push_back(i);
 			}
 		}
 	}
@@ -138,6 +140,10 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 	else
 	{
 		std::vector<int> receivers;
+
+		//receivers are picked among the non sisters
+		//functional but decided to not use it for now
+		/*
 		if ( listNonSisters.size() > listSisters.size() ) //if there is enough non-sisters pick them randomly
 		{
 			while(receivers.size() < listSisters.size())
@@ -162,6 +168,26 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 		{
 			receivers.swap(listNonSisters);
 			energyPerReceiver = EnergyMedeaSharedData::gSacrifice / listNonSisters.size();
+		}
+		*/
+
+		//receivers are picked among all genomes (which include sisters and non-sisters)
+		while(receivers.size() < listSisters.size())
+		{
+			int candidate = std::rand() % listAll.size();
+			bool valid = true;
+			for (unsigned int j = 0 ; j < receivers.size() ; j++ )
+			{
+				if (candidate == receivers[j])
+				{
+					valid = false;
+				}
+			}
+
+			if (valid == true)
+			{
+				receivers.push_back(candidate);
+			}
 		}
 
 		for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
@@ -190,6 +216,7 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 	listNeighbours.erase( std::unique( listNeighbours.begin(), listNeighbours.end() ), listNeighbours.end() );
 
 	std::vector<int> listNonNeighbours;
+	std::vector<int> listAll;
 	for ( int i = 0 ; i != gNumberOfRobots ; i++ )
 	{
 		if ( (dynamic_cast<EnergyMedeaAgentWorldModel*>(gWorld->getRobot(i)->getWorldModel()))->isAlive() == true )
@@ -207,6 +234,7 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 			{
 				listNonNeighbours.push_back(i);
 			}
+			listAll.push_back(i);
 		}
 	}
 
@@ -226,6 +254,9 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 	else
 	{
 		std::vector<int> receivers;
+		//receivers are picked among the none neighbours
+		//functional but decided to not use it for now
+		/*
 		if ( listNonNeighbours.size() > listNeighbours.size() ) //if there is enough non-neighbours pick them randomly
 		{
 			while(receivers.size() < listNeighbours.size())
@@ -250,6 +281,26 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 		{
 			receivers.swap(listNonNeighbours);
 			energyPerReceiver = EnergyMedeaSharedData::gSacrifice / listNonNeighbours.size();
+		}
+		*/
+
+		//receivers are picked among all genomes (which include neighbours and non-neighbours)
+		while(receivers.size() < listNeighbours.size())
+		{
+			int candidate = std::rand() % listAll.size();
+			bool valid = true;
+			for (unsigned int j = 0 ; j < receivers.size() ; j++ )
+			{
+				if (candidate == receivers[j])
+				{
+					valid = false;
+				}
+			}
+
+			if (valid == true)
+			{
+				receivers.push_back(candidate);
+			}
 		}
 
 		for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
