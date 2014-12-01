@@ -69,7 +69,7 @@ void EnergyMedeaAgentObserver::step()
 			{
 				gPhysicalObjects[targetIndex]->isWalked(_wm->getId());
 				_wm->increaseEnergyHarvested();
-				gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " te " << std::endl;
+				//gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " te " << std::endl;
 
 				//decide to share or not the energy
 				if(_wm->getSharing() >= 0.0)
@@ -133,8 +133,8 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 		{
 			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
 			_wm->substractEnergy(energyPerReceiver);
+			_wm->increaseEnergyGiven(energyPerReceiver);
 			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
-			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " ge " << energyPerReceiver << "," << *it << std::endl;
 		}
 	}
 	else
@@ -194,8 +194,8 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 		{
 			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
 			_wm->substractEnergy(energyPerReceiver);
+			_wm->increaseEnergyGiven(energyPerReceiver);
 			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
-			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " ge " << energyPerReceiver << "," << *it << std::endl;
 		}
 	}
 
@@ -247,8 +247,8 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 		{
 			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
 			_wm->substractEnergy(energyPerReceiver);
+			_wm->increaseEnergyGiven(energyPerReceiver);
 			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
-			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " ge " << energyPerReceiver << "," << *it << std::endl;
 		}
 	}
 	else
@@ -307,8 +307,8 @@ void EnergyMedeaAgentObserver::sharingActionNeighbours()
 		{
 			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
 			_wm->substractEnergy(energyPerReceiver);
+			_wm->increaseEnergyGiven(energyPerReceiver);
 			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
-			gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << " ge " << energyPerReceiver << "," << *it << std::endl;
 		}
 	}
 

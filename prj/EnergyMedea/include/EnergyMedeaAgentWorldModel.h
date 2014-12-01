@@ -15,6 +15,7 @@ class EnergyMedeaAgentWorldModel : public RobotWorldModel
 	protected:
 		int _lifeStatus ;
 		double _totalHarvested;
+		double _totalGiven;
 		unsigned long _parent;
 		double _sharing;
 
@@ -36,6 +37,10 @@ class EnergyMedeaAgentWorldModel : public RobotWorldModel
 		double getEnergyHarvested() { return _totalHarvested; }
 		void increaseEnergyHarvested() { _totalHarvested += maxEnergyLevel;  } 
 		void resetEnergyHarvested() { _totalHarvested = 0 ; }
+
+		double getEnergyGiven() { return _totalGiven; }
+		void increaseEnergyGiven(double value) { _totalGiven += value;  } 
+		void resetEnergyGiven() { _totalGiven = 0 ; }
 
 		unsigned long getParent() {return _parent;}
 		void setParent(unsigned long parent) {_parent = parent;}

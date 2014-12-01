@@ -226,9 +226,13 @@ void EnergyMedeaController::logEndGeneration()
 {
 	_endPos = Point2d (_wm->_xReal , _wm->_yReal);
 	double distance = getEuclidianDistance(_startPos, _endPos);
-	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " dd " << distance << std::endl ;
-	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " pe " << _endPos.x << "," << _endPos.y << std::endl ;
-	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " dacc " << _cumulatedDistance << std::endl ;
+	gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " dd " << distance << " pe " << _endPos.x << "," << _endPos.y << " dacc " << _cumulatedDistance << " ge " << _wm->getEnergyGiven() << " e " <<  _wm->getEnergyLevel() << " gList " << _genomesList.size() << std::endl;
+}
+
+void EnergyMedeaController::logGenomeInfo(int parent, int birthdateParent)
+{
+		// descend from
+		gLogFile << gWorld->getIterations() <<  " : " << _wm->getId() << "::" << _birthdate << " df " << parent << "," << birthdateParent << " s " << _currentSigma << std::endl;
 }
 
 void EnergyMedeaController::createNN()
@@ -303,12 +307,14 @@ void EnergyMedeaController::stepEvolution()
 					_wm->setRobotLED_colorValues(255, 0, 0);
 
 					// Logging
-					gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " newGenome " ;
+					gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " newGenome share " << _genome[_genome.size()-1] << std::endl;
+					/*
 					for(unsigned int i=0; i<_genome.size(); i++)
 					{
 						gLogFile << std::fixed << std::showpoint << _genome[i] << " ";
 					}
 					gLogFile << std::endl;
+					*/
 				}
 				else
 				{
@@ -343,12 +349,14 @@ void EnergyMedeaController::stepEvolution()
 						_wm->setEnergyLevel(gEnergyInit);
 					_wm->setRobotLED_colorValues(255, 0, 0);
 
-					gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " newGenome " ;
+					gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " newGenome share " << _genome[_genome.size()-1] << std::endl;
+					/*
 					for(unsigned int i=0; i<_genome.size(); i++)
 					{
 						gLogFile << std::fixed << std::showpoint << _genome[i] << " ";
 					}
 					gLogFile << std::endl;
+					*/
 				}
 				else
 				{
@@ -411,10 +419,12 @@ void EnergyMedeaController::selectRandomGenome()
 			it ++;
 			randomIndex --;
 		}
+		int parent=(*it).first;
 
 		_currentGenome = (*it).second;
 
 		mutate(_sigmaList[(*it).first]);
+		double birthdateParent = _birthdateList[(*it).first];
 
 		setNewGenomeStatus(true);
 
@@ -422,11 +432,9 @@ void EnergyMedeaController::selectRandomGenome()
 
 		_wm->setParent((unsigned long) (_birthdateList[(*it).first]*(gNumberOfRobots+1))+(*it).first);
 
-		// descend from
-		gLogFile << gWorld->getIterations() <<  " : " << _wm->getId() << "::" << _birthdate << " df " << (*it).first << "," << _birthdateList[(*it).first] << std::endl;
-		gLogFile <<  gWorld->getIterations() << " : " << _wm->getId() << "::" << _birthdate << " e " <<  _wm->getEnergyLevel() << " gList " << _genomesList.size() << std::endl;
-
 		_genomesList.clear();
+
+		logGenomeInfo(parent,birthdateParent);
 	}
 }
 
@@ -474,9 +482,6 @@ void EnergyMedeaController::mutate( float sigma) // mutate within bounds.
 	}
 
 	_currentGenome = _genome;
-
-	// Logging
-	gLogFile << gWorld->getIterations() <<  " : " << _wm->getId() << "::" << _birthdate << " s " << _currentSigma << std::endl;
 }
 
 

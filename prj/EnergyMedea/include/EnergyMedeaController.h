@@ -51,6 +51,7 @@ class EnergyMedeaController : public Controller
 		void stepBehaviour();
 		void stepEvolution();
 		void logEndGeneration();
+		void logGenomeInfo(int parent, int birthdateParent);
 
 		void broadcastGenome();
 		bool loadNewGenome();

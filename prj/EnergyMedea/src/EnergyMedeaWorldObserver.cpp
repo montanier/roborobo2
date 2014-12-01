@@ -118,8 +118,7 @@ void EnergyMedeaWorldObserver::updateMonitoring()
 		}
         
         // Logging
-        gLogFile << gWorld->getIterations() << " : pop_alive " << activeCount << std::endl;
-        gLogFile << gWorld->getIterations() << " : tot_energy " << total_energy << std::endl;
+        gLogFile << gWorld->getIterations() << " : pop " << activeCount << " totE " << total_energy << std::endl;
 	}
     
     // * Every N generations, take a video (one generation)
