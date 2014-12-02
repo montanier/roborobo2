@@ -17,7 +17,7 @@ if [ `perl -ne 'print "$.\n" if /\x00/;' $logFileName | wc -l` -gt 0 ]
 then 
 	echo "NULL character in $logFileName. This file won't be taken into account." 
 else
-	activeCount=`grep -a " : pop_alive" $logFileName | tail -n 1 | sed -r -e "s/[0-9]+ : pop_alive //"`
+	activeCount=`grep -a " : pop" $logFileName | tail -n 1 | sed -r -e "s/[0-9]+ : pop //" | sed -r -e "s/ totE .*//"`
 
 	#transmit log file if necessary
 	if (( $activeCount > $threshold ))
