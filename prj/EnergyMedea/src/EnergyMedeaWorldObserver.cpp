@@ -32,7 +32,6 @@ EnergyMedeaWorldObserver::EnergyMedeaWorldObserver( World* world ) : WorldObserv
     gProperties.checkAndGetPropertyValue("gSharing",&EnergyMedeaSharedData::gSharing,false);
     gProperties.checkAndGetPropertyValue("gSetup",&EnergyMedeaSharedData::gSetup,false);
     gProperties.checkAndGetPropertyValue("gCoopPartner",&EnergyMedeaSharedData::gCoopPartner,false);
-    gProperties.checkAndGetPropertyValue("gSacrifice",&EnergyMedeaSharedData::gSacrifice,false);
     
 	gProperties.checkAndGetPropertyValue("gMonitorPositions",&EnergyMedeaSharedData::gMonitorPositions,true);
 
