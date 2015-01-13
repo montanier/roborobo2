@@ -124,11 +124,10 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 		}
 	}
 
-	float energyPerReceiver = EnergyMedeaSharedData::gSacrifice / listSisters.size();
-	//if EnergyMedeaSharedData::gCoopPartner is equal to 1 give to close
-	//otherwise give to far away
+	//is equal to 1: give to close and keep a share
 	if (EnergyMedeaSharedData::gCoopPartner == 1)
 	{
+		float energyPerReceiver = gEnergyItemDefaultInit / (listSisters.size() +1);
 		for (std::vector<int>::iterator it = listSisters.begin(); it != listSisters.end(); it++)
 		{
 			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
@@ -137,11 +136,95 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
 		}
 	}
-	else
+	//is equal to 2: give all to close (self does not keep anything)
+	else if (EnergyMedeaSharedData::gCoopPartner == 2)
+	{
+		if (listSisters.size() > 0)
+		{
+			float energyPerReceiver = gEnergyItemDefaultInit / listSisters.size() ;
+			for (std::vector<int>::iterator it = listSisters.begin(); it != listSisters.end(); it++)
+			{
+				gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
+				_wm->substractEnergy(energyPerReceiver);
+				_wm->increaseEnergyGiven(energyPerReceiver);
+				if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
+			}
+		}
+	}
+	//is equal to 3: give all to others and keep a share
+	else if (EnergyMedeaSharedData::gCoopPartner == 3)
 	{
 		std::vector<int> receivers;
+		while(receivers.size() < listSisters.size())
+		{
+			int candidate = std::rand() % listAll.size();
+			bool valid = true;
+			for (unsigned int j = 0 ; j < receivers.size() ; j++ )
+			{
+				if (candidate == receivers[j])
+				{
+					valid = false;
+				}
+			}
 
-		//receivers are picked among the non sisters
+			if (valid == true)
+			{
+				receivers.push_back(candidate);
+			}
+		}
+
+		float energyPerReceiver = gEnergyItemDefaultInit / (receivers.size() +1);
+		for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
+		{
+			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
+			_wm->substractEnergy(energyPerReceiver);
+			_wm->increaseEnergyGiven(energyPerReceiver);
+			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
+		}
+	}
+	//is equal to 4: give all to other (self does not keep anything)
+	else if (EnergyMedeaSharedData::gCoopPartner == 4)
+	{
+		std::vector<int> receivers;
+		while(receivers.size() < listSisters.size())
+		{
+			int candidate = std::rand() % listAll.size();
+			bool valid = true;
+			for (unsigned int j = 0 ; j < receivers.size() ; j++ )
+			{
+				if (candidate == receivers[j])
+				{
+					valid = false;
+				}
+			}
+
+			if (valid == true)
+			{
+				receivers.push_back(candidate);
+			}
+		}
+
+		if (listSisters.size() > 0)
+		{
+			float energyPerReceiver = gEnergyItemDefaultInit / receivers.size() ;
+			for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
+			{
+				gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
+				_wm->substractEnergy(energyPerReceiver);
+				_wm->increaseEnergyGiven(energyPerReceiver);
+				if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
+			}
+		}
+	}
+	else
+	{
+		std::cerr << "ERROR: coop option unknown. Stop the simulation." << std::endl;
+		exit(1);
+	}
+
+
+
+		//receivers are picked among the non sisters exclusively
 		//functional but decided to not use it for now
 		/*
 		if ( listNonSisters.size() > listSisters.size() ) //if there is enough non-sisters pick them randomly
@@ -171,33 +254,6 @@ void EnergyMedeaAgentObserver::sharingActionKinship()
 		}
 		*/
 
-		//receivers are picked among all genomes (which include sisters and non-sisters)
-		while(receivers.size() < listSisters.size())
-		{
-			int candidate = std::rand() % listAll.size();
-			bool valid = true;
-			for (unsigned int j = 0 ; j < receivers.size() ; j++ )
-			{
-				if (candidate == receivers[j])
-				{
-					valid = false;
-				}
-			}
-
-			if (valid == true)
-			{
-				receivers.push_back(candidate);
-			}
-		}
-
-		for (std::vector<int>::iterator it = receivers.begin(); it != receivers.end(); it++)
-		{
-			gWorld->getRobot(*it)->getWorldModel()->addEnergy(energyPerReceiver);
-			_wm->substractEnergy(energyPerReceiver);
-			_wm->increaseEnergyGiven(energyPerReceiver);
-			if (_wm->getEnergyLevel() == 0) break; // break as soon as there is no more energy
-		}
-	}
 
 }
 
