@@ -120,7 +120,7 @@ else
 	touch "./lastRunDone"
 	killall -9 roborobo
 	sleep 60
-	./clean-logs.sh
+	#./clean-logs.sh
 	rm temp*
 fi
 
